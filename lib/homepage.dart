@@ -76,24 +76,57 @@ class _HomePageState extends State<HomePage> {
       });
       isWorking = false;
     }
-  }@override
+  }
+
+  @override
   void dispose() async {
     // TODO: implement dispose
     super.dispose();
     await Tflite.close();
     cameraController!.dispose();
-
   }
-  
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 270,
+      width: 360,
+      child: Center(
+          child: imgCamera == null
+              ? Container(
+                  height: 270,
+                  child: GestureDetector(
+                      onTap: () {
+                        initCamera();
+                      },
+                      child: Icon(Icons.video_call)),
+                  width: 360,
+                  color: Colors.white,
+                )
+              : Column(
+                children: [
+                  Container(
+                    height: 270,
+                    width: 300,
+                    color: Colors.white,
+                    child: CameraPreview(cameraController!),
+                  ),
+                  Text(result,style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 100
+                  ),),
+                ],
+              ),),
+              
+              // AspectRatio(
+              //     aspectRatio: cameraController!.value.aspectRatio,
+              //     child: CameraPreview(cameraController!),
+              //   )),
       decoration: BoxDecoration(
         color: Colors.green[200],
         image: DecorationImage(
           image: AssetImage('assets/back.jpg'),
-          fit: BoxFit.fill,
+          fit: BoxFit.cover,
         ),
       ),
     );
