@@ -1,10 +1,12 @@
 import 'package:camera/camera.dart';
+import 'package:dog_breed_classification/camerapage.dart';
 import 'package:dog_breed_classification/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_tflite/flutter_tflite.dart';
+import 'package:lottie/lottie.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,119 +16,74 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool isWorking = false;
-  String result = '';
-  CameraController? cameraController;
-  CameraImage? imgCamera;
-
-  initCamera() {
-    cameraController = CameraController(cameras![0], ResolutionPreset.medium);
-    cameraController!.initialize().then((value) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        cameraController!.startImageStream((image) => {
-              if (!isWorking)
-                {
-                  isWorking = true,
-                  imgCamera = image,
-                  runmodelOnStreamFrames(),
-                }
-            });
-      });
-    });
-  }
-
-  loadmodal() async {
-    Tflite.loadModel(model: "assets/model.tflite", labels: "assets/labels.txt");
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    loadmodal();
-  }
-
-  runmodelOnStreamFrames() async {
-    if (imgCamera != null) {
-      var recognitions = await Tflite.runModelOnFrame(
-        bytesList: imgCamera!.planes.map((plane) {
-          return plane.bytes;
-        }).toList(),
-        imageHeight: imgCamera!.height,
-        imageWidth: imgCamera!.width,
-        imageMean: 127.5,
-        imageStd: 175.5,
-        rotation: 90,
-        numResults: 2,
-        threshold: 0.1,
-        asynch: true,
-      );
-      result = '';
-      recognitions!.forEach((response) {
-        result += response['label'] +
-            " " +
-            (response['confidence'] as double).toStringAsFixed(2) +
-            "\n\n";
-      });
-      setState(() {
-        result;
-      });
-      isWorking = false;
-    }
-  }
-
-  @override
-  void dispose() async {
-    // TODO: implement dispose
-    super.dispose();
-    await Tflite.close();
-    cameraController!.dispose();
-  }
-
+ 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 270,
-      width: 360,
-      child: Center(
-          child: imgCamera == null
-              ? Container(
-                  height: 270,
-                  child: GestureDetector(
-                      onTap: () {
-                        initCamera();
-                      },
-                      child: Icon(Icons.video_call)),
-                  width: 360,
-                  color: Colors.white,
-                )
-              : Column(
-                children: [
-                  Container(
+    return Scaffold(
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: 360,
+        child: Center(
+            child: 
+                 Container(
                     height: 270,
-                    width: 300,
-                    color: Colors.white,
-                    child: CameraPreview(cameraController!),
-                  ),
-                  Text(result,style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 100
-                  ),),
-                ],
-              ),),
-              
-              // AspectRatio(
-              //     aspectRatio: cameraController!.value.aspectRatio,
-              //     child: CameraPreview(cameraController!),
-              //   )),
-      decoration: BoxDecoration(
-        color: Colors.green[200],
-        image: DecorationImage(
-          image: AssetImage('assets/back.jpg'),
-          fit: BoxFit.cover,
+                    child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => CameraPage()));
+                          // initCamera();
+                        },
+                        child: Container(
+                     height: 30,
+                     width: 20,
+                          
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Lottie.asset('assets/dog123.json',height: 200,width: 200,fit: BoxFit.cover),
+                              Container(
+                                height: 40,
+                                width: 180,
+                                child: Center(child: Text("Get Started",style: TextStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.bold),)),
+                         
+                              decoration: BoxDecoration(
+            color: Colors.brown[200],
+                                  borderRadius: BorderRadius.circular(40)
+                                ),
+                               
+    
+                              )
+                            ],
+                          )),
+    ),
+                    width: 360,
+                    
+                  )
+                // : Column(
+                //   children: [
+                //     Container(
+                //       height: 270,
+                //       width: 300,
+                //       color: Colors.white,
+                //       child: CameraPreview(cameraController!),
+                //     ),
+                //     Text(result,style: TextStyle(
+                //       color: Colors.black,
+                //       fontSize: 100
+                //     ),),
+                //   ],
+                // ),),
+        ),
+                
+                // AspectRatio(
+                //     aspectRatio: cameraController!.value.aspectRatio,
+                //     child: CameraPreview(cameraController!),
+                //   )),
+        decoration: BoxDecoration(
+          color: Colors.green[200],
+          image: DecorationImage(
+            image: AssetImage('assets/back.jpg'),
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
